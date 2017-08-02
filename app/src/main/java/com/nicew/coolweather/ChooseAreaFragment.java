@@ -1,6 +1,7 @@
 package com.nicew.coolweather;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -71,6 +72,8 @@ public class ChooseAreaFragment extends Fragment {
     //当前选中级别
     private int currentLevel;
 
+    private static final String TAG = "ChooseAreaFragment";
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -95,6 +98,12 @@ public class ChooseAreaFragment extends Fragment {
                 } else if(currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(position);
                     queryCounties();
+                } else if (currentLevel == LEVEL_COUNTY) {
+                    String weatherId = countyList.get(position).getWeatherId();
+                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                    intent.putExtra("weather_id", weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -108,6 +117,7 @@ public class ChooseAreaFragment extends Fragment {
                 }
             }
         });
+        queryProvinces();
     }
 
     //查询全国所有的省， 优先从数据库查询， 如果没有查询到再去服务器查询
@@ -185,7 +195,7 @@ public class ChooseAreaFragment extends Fragment {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String responseText = response.body().toString();
+                String responseText = response.body().string();
                 boolean result = false;
                 if("province".equals(type)) {
                     result = Utility.handleProvinceResponse(responseText);
